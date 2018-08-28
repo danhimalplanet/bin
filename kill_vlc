@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# VLC on my mac goes out of control
+
+kill -9 `pgrep -f VLC`

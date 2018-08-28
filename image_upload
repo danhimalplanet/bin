@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+
+# upload image to twitter
+
+# create file ~/.creds-twitter
+
+# https://developer.twitter.com/en/docs/basics/authentication/guides/access-tokens.html
+
+#{
+#   "twitter_account": "jack"",
+#   "consumer_key": "RGcJaltjxgDryG2jpdl31f2DU",
+#   "consumer_secret": "2osMMQCEUqolDRpkK5TgGNxv4VjE8xVvsggFL97Ri5lxZt1Jn7",
+#   "access_token": "948523140636127232-JpQ11KgPFCvun3O7ktyIYOE6JL3wF1I",
+#   "access_token_secret": "xSoZtb9qUuBELBMAShrYMDXlQwb5BbqGUbdeJb793HaxW"
+#}
+
+import json
+import os
+import sys
+
+from twython import Twython
+
+from pathlib import Path
+
+home = str(Path.home())
+
+if len(sys.argv) != 2:
+    print("need name of one file to upload")
+    sys.exit(1)
+
+file = sys.argv[1]
+
+if file[0] != "/":
+    file = sys.argv[1].lstrip("./")
+    file = os.path.abspath(file)
+
+with open(home + "/.creds-twitter") as f:
+  creds = json.load(f)
+
+client = Twython(creds['consumer_key'], creds['consumer_secret'],
+                 creds['access_token'], creds['access_token_secret'])
+
+photo = open(file, 'rb')
+
+response = client.upload_media(media=photo)
+
+client.update_status(status='', media_ids=[response['media_id']])
+
+tweet=client.get_user_timeline(screen_name=creds['twitter_account'], count=1)
+
+url_path=tweet[0]['entities']['media'][0]['media_url_https']
+
+print(url_path)
